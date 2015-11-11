@@ -31,40 +31,21 @@
  *
  */
 
-#include <iostream>
-#include <memory>
-#include <string>
+#ifndef __DLDB_SRC_SERVER_DLDBSERVICEIMPL_H__
+#define __DLDB_SRC_SERVER_DLDBSERVICEIMPL_H__
 
 #include <grpc++/grpc++.h>
 
 #include "dldb.grpc.pb.h"
 
-class DldbServiceImpl : public dldb::rpc::Service
+class DldbServiceImpl : public dldb::Service
 {
 	public:
-
-		DldbServiceImpl(const std::string& _dataPath)：
-			dataPath(_dataPath)
+		DldbServiceImpl(const std::string& _dataDir)
+			: dataDir(_dataDir)
 		{
 		}
 
-		grpc::Status insert(grpc::ServerContext* context, const dldb::InsertRequest* request, InsertReply)
-		{
+		grpc::Status insert(grpc::ServerContext* context, const InsertRequest* request, InsertReply);
 
-		}
-
-	private:
-		DldbServiceImpl(const DldbServiceImpl& );
-		DldbServiceImpl& operator = (const DldbServiceImpl& );
-};
-
-void runServer()
-{
-
-}
-
-int main(int argc, char* argv[])
-{
-	return 0;
-}
 

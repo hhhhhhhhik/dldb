@@ -35,7 +35,7 @@ option objc_class_prefix = "DLDB";
 package dldb;
 
 // The greeting service definition.
-service dldb {
+service rpc {
   // for one-row client operation
   rpc insert (InsertRequest) returns (InsertReply) {}
   rpc delete (DeleteRequest) returns (DeleteReply) {}
