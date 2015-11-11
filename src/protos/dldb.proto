@@ -56,7 +56,7 @@ message GetRequest {
 }
 
 message ReturnMsg {
-  int ret_code = 1;
+  bool ok = 1;
   string ret_msg = 2;
 }
 

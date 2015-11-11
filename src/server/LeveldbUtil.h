@@ -31,30 +31,86 @@
  *
  */
 
-#include <iostream>
-#include <memory>
+#ifndef __DLDB_SRC_SERVER_LEVELDBUTIL_H__
+#define __DLDB_SRC_SERVER_LEVELDBUTIL_H__
 
-#include "DldbServiceImpl.h"
+#include <assert.h>
 
-void runServer()
+#include <string>
+
+#include "leveldb/db.h"
+
+namespace dldb
 {
-	std::string serverAdderess("0.0.0.0:30000");
-	std::string dataDir("/root/data/");
+	class LeveldbUtil
+	{
+		public:
+			LeveldbUtil(const std::string& _dataDir)
+					: dataDir(_dataDir)
+					  db(NULL)
+			{
+			}
 
-	DldbServiceImpl service(dataDir);
-	grpc::ServerBuilder builder;
+			~leveldb()
+			{
+				delete db;
+				db = NULL;
+			}
 
-	builder.AddListeningPort(serverAdderess, grpc::InsecureServerCredentials());
-	builder.RegisterService(&service);
-	std::unique_ptr<grpc::Server> server(builder.BuildAndStart());
+			bool connect()
+			{
+				leveldb::Options options;
+				options.create_if_missing = true;
+				leveldb::Status status = leveldb::DB::Open(options, dataDir, db);
 
-	server->Wait();
+				return status.ok();
+			}
+
+			void insert(const std::string& key, const std::string& value,
+						bool* ok, std::string* message)
+			{
+				assert(db != NULL);
+
+				leveldb::Status status;
+				status = db->Put(leveldb::WriteOptions(), key, value);
+
+				*ok = status.ok();
+				*message = status.ToString();
+			}
+
+			void delete(const std::string& key, bool* ok, std::string* message)
+			{
+				assert(db != NULL);
+
+				leveldb::Status status;
+				status = db->Delete(leveldb::WriteOptions(), key, value);
+
+				*ok = status.ok();
+				*message = status.ToString();
+			}
+
+			std::string get(const std::string& key, bool* ok, std::string* message)
+			{
+				assert(db != NULL);
+
+				leveldb::Status status;
+				std::string value;
+				status = db->Get(leveldb::ReadOptions(), key, &value);
+
+				*ok = status.ok();
+				*message = status.ToString();
+			}
+
+		private:
+			// FOR NONCOPYABLE
+			LeveldbUtil(const LeveldbUtil& );
+			LeveldbUtil& operator = (const LeveldbUtil& );
+
+		private:
+			std::string dataDir;
+			leveldb::DB *db;
+	};
 }
 
-int main(int argc, char* argv[])
-{
-	runServer();
-	
-	return 0;
-}
 
+#endif  // __DLDB_SRC_SERVER_LEVELDBUTIL_H__

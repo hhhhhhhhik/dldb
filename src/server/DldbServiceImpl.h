@@ -36,16 +36,43 @@
 
 #include <grpc++/grpc++.h>
 
+#include "LeveldbUtil.h"
+
 #include "dldb.grpc.pb.h"
 
-class DldbServiceImpl : public dldb::Service
+namespace dldb
 {
-	public:
-		DldbServiceImpl(const std::string& _dataDir)
-			: dataDir(_dataDir)
-		{
-		}
+	class DldbServiceImpl : public dldb::rpc::Service 
+	{
+		public:
+			DldbServiceImpl(const std::string& _dataDir);
+			
+			virtual ~DldbServiceImpl();
 
-		grpc::Status insert(grpc::ServerContext* context, const InsertRequest* request, InsertReply);
+			grpc::Status insert(grpc::ServerContext* context, 
+				const InsertRequest* request, InsertReply* reply) override;
+
+			grpc::Status delete(grpc::ServerContext* context,
+				const DeleteRequest* request, DeleteReply* reply) override;
+
+			grpc::Status get(grpc::ServerContext* context, 
+				const GetRequest* request, GetReply* reply) override;
+		private:
+			// FOR NONCOPYABLE
+			DldbServiceImpl(const DldbServiceImpl& );
+			DldbServiceImpl& operator = (const DldbServiceImpl& );
+
+			void init();
+		private:
+			std::string dataDir;
+			LeveldbUtil* ldb;
+			bool initFlag;
+	};
+}
+
+#endif  // __DLDB_SRC_SERVER_DLDBSERVICEIMPL_H__
+
+
+
 
 
