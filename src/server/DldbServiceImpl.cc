@@ -56,13 +56,13 @@ namespace dldb
  			return;
  		else
  		{
- 			ldb = new LeveldbUtil(dataDir)
+ 			ldb = new LeveldbUtil(dataDir);
  			if (ldb->connect())
  				initFlag = true;
  		}
  	}
 
- 	grpc::Status DldbServiceImpl::insert(grpc::ServerContext* context, 
+ 	grpc::Status DldbServiceImpl::Insert(grpc::ServerContext* context, 
 			const InsertRequest* request, InsertReply* reply)
  	{
  		assert(request != NULL);
@@ -72,28 +72,28 @@ namespace dldb
 
  		if (!initFlag)
  		{
- 			return grpc::Status(StatusCode::UNVAILABLE, 
- 				"Cannot open the ldb instance")
+ 			return grpc::Status(grpc::StatusCode::UNAVAILABLE, 
+ 				"Cannot open the ldb instance");
  		}
  		else
  		{
  			bool ok;
  			std::string message;
 
- 			ldb->insert(request->key(), request->value(),
+ 			ldb->insert(request->key(), request->values(),
  						&ok, &message);
 
  			dldb::ReturnMsg msg;
- 			msg.set_ok() = ok;
- 			msg.set_ret_msg() = msg;
+ 			msg.set_ok(ok);
+ 			msg.set_ret_msg(message);
 
- 			reply->set_msg() = msg;
+ 			reply->mutable_msg()->CopyFrom(msg);
 
  			return grpc::Status::OK;
  		}
  	}
 
- 	grpc::Status DldbServiceImpl::delete(grpc::ServerContext* context,
+ 	grpc::Status DldbServiceImpl::Delete(grpc::ServerContext* context,
 			const DeleteRequest* request, DeleteReply* reply)
  	{
  		assert(request != NULL);
@@ -103,28 +103,28 @@ namespace dldb
 
  		if (!initFlag)
  		{
- 			return grpc::Status(StatusCode::UNVAILABLE, 
- 				"Cannot open the ldb instance")
+ 			return grpc::Status(grpc::StatusCode::UNAVAILABLE, 
+ 				"Cannot open the ldb instance");
  		}
  		else
  		{
  			bool ok;
  			std::string message;
 
- 			ldb->delete(request->key(), &ok, &message);
+ 			ldb->del(request->key(), &ok, &message);
 
  			dldb::ReturnMsg msg;
- 			msg.set_ok() = ok;
- 			msg.set_ret_msg() = msg;
+ 			msg.set_ok(ok);
+ 			msg.set_ret_msg(message);
 
- 			reply->set_msg() = msg;
+ 			reply->mutable_msg()->CopyFrom(msg);
 
  			return grpc::Status::OK;
  		}
  	}
 
- 	grpc::Status DldbServiceImpl::get(grpc::ServerContext* context,
-			const GetReply* reply)
+ 	grpc::Status DldbServiceImpl::Get(grpc::ServerContext* context,
+			const GetRequest* request, GetReply* reply)
  	{
  		assert(request != NULL);
  		assert(reply != NULL);
@@ -133,8 +133,8 @@ namespace dldb
 
  		if (!initFlag)
  		{
- 			return grpc::Status(StatusCode::UNVAILABLE, 
- 				"Cannot open the ldb instance")
+ 			return grpc::Status(grpc::StatusCode::UNAVAILABLE, 
+ 				"Cannot open the ldb instance");
  		}
  		else
  		{
@@ -144,11 +144,11 @@ namespace dldb
  			std::string value = ldb->get(request->key(), &ok, &message);
 
  			dldb::ReturnMsg msg;
- 			msg.set_ok() = ok;
- 			msg.set_ret_msg() = msg;
+ 			msg.set_ok(ok);
+ 			msg.set_ret_msg(message);
 
- 			reply->set_msg() = msg;
- 			reply->set_value() = value;
+ 			reply->mutable_msg()->CopyFrom(msg);
+ 			reply->set_value(value);
 
  			return grpc::Status::OK;
  		}

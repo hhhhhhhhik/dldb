@@ -31,86 +31,58 @@
  *
  */
 
-#ifndef __DLDB_SRC_SERVER_LEVELDBUTIL_H__
-#define __DLDB_SRC_SERVER_LEVELDBUTIL_H__
-
-#include <assert.h>
+#ifndef __DLDB_SRC_CLIENT_DLDBCLIENT_H__
+#define __DLDB_SRC_CLIENT_DLDBCLIENT_H__
 
 #include <string>
+#include <memory>
 
-#include "leveldb/db.h"
+#include <grpc++/grpc++.h>
+
+#include "dldb.grpc.pb.h"
 
 namespace dldb
 {
-	class LeveldbUtil
+	class DldbClient
 	{
 		public:
-			LeveldbUtil(const std::string& _dataDir)
-					: dataDir(_dataDir),
-					  db(NULL)
+			DldbClient(std::shared_ptr<grpc::Channel> _proxy)
+				: proxy(_proxy)
 			{
 			}
 
-			~LeveldbUtil()
+			~DldbClient()
 			{
-				delete db;
-				db = NULL;
 			}
 
-			bool connect()
+			std::string getByKey(const std::string& key)
 			{
-				leveldb::Options options;
-				options.create_if_missing = true;
-				leveldb::Status status = leveldb::DB::Open(options, dataDir, &db);
+				GetRequest request;
+				request.set_key(key);
 
-				return status.ok();
-			}
+				GetReply reply;
+				grpc::ClientContext context;
 
-			void insert(const std::string& key, const std::string& value,
-						bool* ok, std::string* message)
-			{
-				assert(db != NULL);
+				grpc::Status status = proxy->Get(&context, request, &reply);
 
-				leveldb::Status status;
-				status = db->Put(leveldb::WriteOptions(), key, value);
-
-				*ok = status.ok();
-				*message = status.ToString();
-			}
-
-			void del(const std::string& key, bool* ok, std::string* message)
-			{
-				assert(db != NULL);
-
-				leveldb::Status status;
-				status = db->Delete(leveldb::WriteOptions(), key);
-
-				*ok = status.ok();
-				*message = status.ToString();
-			}
-
-			std::string get(const std::string& key, bool* ok, std::string* message)
-			{
-				assert(db != NULL);
-
-				leveldb::Status status;
-				std::string value;
-				status = db->Get(leveldb::ReadOptions(), key, &value);
-
-				*ok = status.ok();
-				*message = status.ToString();
+				if (status.ok()) 
+				{
+					return reply.value();
+				}
+				else
+				{
+					return status.error_message()
+				}
 			}
 
 		private:
-			// FOR NONCOPYABLE
-			LeveldbUtil(const LeveldbUtil& );
-			LeveldbUtil& operator = (const LeveldbUtil& );
+			// FOR NON COPYABLE
+			DldbClient(const DldbClient& );
+			DldbClient& operator = (const DldbClient& );
 
 		private:
-			std::string dataDir;
-			leveldb::DB *db;
+			std::unique_ptr<grpc::Channel> proxy;
 	};
 }
 
-
-#endif  // __DLDB_SRC_SERVER_LEVELDBUTIL_H__
+#endif  // __DLDB_SRC_CLIENT_DLDBCLIENT_H__

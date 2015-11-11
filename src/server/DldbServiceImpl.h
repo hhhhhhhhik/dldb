@@ -49,13 +49,13 @@ namespace dldb
 			
 			virtual ~DldbServiceImpl();
 
-			grpc::Status insert(grpc::ServerContext* context, 
+			grpc::Status Insert(grpc::ServerContext* context, 
 				const InsertRequest* request, InsertReply* reply) override;
 
-			grpc::Status delete(grpc::ServerContext* context,
+			grpc::Status Delete(grpc::ServerContext* context,
 				const DeleteRequest* request, DeleteReply* reply) override;
 
-			grpc::Status get(grpc::ServerContext* context, 
+			grpc::Status Get(grpc::ServerContext* context, 
 				const GetRequest* request, GetReply* reply) override;
 		private:
 			// FOR NONCOPYABLE

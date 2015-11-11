@@ -41,7 +41,7 @@ void runServer()
 	std::string serverAdderess("0.0.0.0:30000");
 	std::string dataDir("/root/data/");
 
-	DldbServiceImpl service(dataDir);
+	dldb::DldbServiceImpl service(dataDir);
 	grpc::ServerBuilder builder;
 
 	builder.AddListeningPort(serverAdderess, grpc::InsecureServerCredentials());

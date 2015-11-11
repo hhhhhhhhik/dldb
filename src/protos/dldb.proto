@@ -37,9 +37,9 @@ package dldb;
 // The greeting service definition.
 service rpc {
   // for one-row client operation
-  rpc insert (InsertRequest) returns (InsertReply) {}
-  rpc delete (DeleteRequest) returns (DeleteReply) {}
-  rpc get(GetRequest) returns (GetReply) {}
+  rpc Insert (InsertRequest) returns (InsertReply) {}
+  rpc Delete (DeleteRequest) returns (DeleteReply) {}
+  rpc Get(GetRequest) returns (GetReply) {}
 }
 
 message InsertRequest {
