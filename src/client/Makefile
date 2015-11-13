@@ -26,7 +26,7 @@ vpath %.proto $(PROTOS_PATH)
 
 all:$(TARGETS)
 
-$(TARGETS): dldb.pb.o dldb.grpc.pb.o client.o
+$(TARGETS): ldb.pb.o ldb.grpc.pb.o client.o
 	$(CXX) $^ $(LDFLAGS) -o $@
 
 %.grpc.pb.cc: %.proto

@@ -31,71 +31,43 @@
  *
  */
 
-#ifndef __DLDB_SRC_CLIENT_STATUS_H__
-#define __DLDB_SRC_CLIENT_STATUS_H__
+#ifndef __DLDB_SRC_SERVER_LDBSERVICEIMPL_H__
+#define __DLDB_SRC_SERVER_LDBSERVICEIMPL_H__
 
-#include <string>
+#include <grpc++/grpc++.h>
+
+#include "LeveldbUtil.h"
+
+#include "ldb.grpc.pb.h"
 
 namespace ldb
 {
-	class Status
+	class LdbServiceImpl : public ldb::rpc::Service 
 	{
 		public:
-			Status()
-				: code(0),
-				  message("ok")
-			{	
-			}
-
-			~Status()
-			{
-			}
-
-			Status(int _code, const std::string& _message)
-				: code(_code),
-				  message(_message)
-			{
-			}
-
-			Status(const Status& _status)
-				: code(_status.code),
-				  message(_status.message)
-			{
-			}
-
-			Status& operator = (const Status& _status)
-			{
-				if (this == &_status)
-					return *this;
-				else
-				{
-					code = _status.code;
-					message = _status.message;
-					return *this;
-				}
-			}
-
-		public:
-
-			inline bool ok() const 
-			{
-				return (code == 0);
-			}
-
-			inline int getCode() const
-			{
-				return code;
-			}
-
-			inline std::string getMessage() const
-			{
-				return message;
-			}
+			LdbServiceImpl(const std::string& _dataDir);
 			
+			virtual ~LdbServiceImpl();
+
+			grpc::Status Insert(grpc::ServerContext* context, 
+				const InsertRequest* request, InsertReply* reply) override;
+
+			grpc::Status Delete(grpc::ServerContext* context,
+				const DeleteRequest* request, DeleteReply* reply) override;
+
+			grpc::Status Get(grpc::ServerContext* context, 
+				const GetRequest* request, GetReply* reply) override;
 		private:
-			int code;
-			std::string message;
+			// FOR NONCOPYABLE
+			LdbServiceImpl(const LdbServiceImpl& );
+			LdbServiceImpl& operator = (const LdbServiceImpl& );
+
+			void init();
+		private:
+			std::string dataDir;
+			LeveldbUtil* ldb;
+			bool initFlag;
 	};
 }
 
-#endif  // __DLDB_SRC_CLIENT_STATUS_H__
+#endif  // __DLDB_SRC_SERVER_LDBSERVICEIMPL_H__

@@ -35,16 +35,16 @@
 
 #include <grpc++/grpc++.h>
 
-#include "DldbClient.h"
+#include "LdbClient.h"
 
 int main(int argc, char* argv[])
 {
-	dldb::DldbClient client("localhost:30001");
+	ldb::LdbClient client("localhost:30001");
 
 	std::string key("foo");
 	std::string value;
 
-	dldb::Status status = client.getByKey(key, &value);
+	ldb::Status status = client.getByKey(key, &value);
 
 	if (status.ok())
 	{

@@ -31,71 +31,10 @@
  *
  */
 
-#ifndef __DLDB_SRC_CLIENT_STATUS_H__
-#define __DLDB_SRC_CLIENT_STATUS_H__
+#ifndef __DLDB_SRC_SERVER_ZOOKEEPERUTIL_H__
+#define __DLDB_SRC_SERVER_ZOOKEEPERUTIL_H__
 
-#include <string>
 
-namespace ldb
-{
-	class Status
-	{
-		public:
-			Status()
-				: code(0),
-				  message("ok")
-			{	
-			}
 
-			~Status()
-			{
-			}
 
-			Status(int _code, const std::string& _message)
-				: code(_code),
-				  message(_message)
-			{
-			}
-
-			Status(const Status& _status)
-				: code(_status.code),
-				  message(_status.message)
-			{
-			}
-
-			Status& operator = (const Status& _status)
-			{
-				if (this == &_status)
-					return *this;
-				else
-				{
-					code = _status.code;
-					message = _status.message;
-					return *this;
-				}
-			}
-
-		public:
-
-			inline bool ok() const 
-			{
-				return (code == 0);
-			}
-
-			inline int getCode() const
-			{
-				return code;
-			}
-
-			inline std::string getMessage() const
-			{
-				return message;
-			}
-			
-		private:
-			int code;
-			std::string message;
-	};
-}
-
-#endif  // __DLDB_SRC_CLIENT_STATUS_H__
+#endif  // __DLDB_SRC_SERVER_ZOOKEEPERUTIL_H__

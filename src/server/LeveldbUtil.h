@@ -41,7 +41,7 @@
 
 #include "leveldb/db.h"
 
-namespace dldb
+namespace ldb
 {
 	class LeveldbUtil
 	{

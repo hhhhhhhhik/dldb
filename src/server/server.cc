@@ -34,14 +34,14 @@
 #include <iostream>
 #include <memory>
 
-#include "DldbServiceImpl.h"
+#include "LdbServiceImpl.h"
 
 void runServer()
 {
 	std::string serverAdderess("0.0.0.0:30001");
 	std::string dataDir("/root/data/");
 
-	dldb::DldbServiceImpl service(dataDir);
+	ldb::LdbServiceImpl service(dataDir);
 	grpc::ServerBuilder builder;
 
 	builder.AddListeningPort(serverAdderess, grpc::InsecureServerCredentials());
