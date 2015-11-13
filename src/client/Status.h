@@ -31,30 +31,71 @@
  *
  */
 
-#include <iostream>
-#include <memory>
+#ifndef __DLDB_SRC_CLIENT_STATUS_H__
+#define __DLDB_SRC_CLIENT_STATUS_H__
 
-#include "DldbServiceImpl.h"
+#include <string>
 
-void runServer()
+namespace dldb
 {
-	std::string serverAdderess("0.0.0.0:30001");
-	std::string dataDir("/root/data/");
+	class Status
+	{
+		public:
+			Status()
+				: code(0),
+				  message("ok")
+			{	
+			}
 
-	dldb::DldbServiceImpl service(dataDir);
-	grpc::ServerBuilder builder;
+			~Status()
+			{
+			}
 
-	builder.AddListeningPort(serverAdderess, grpc::InsecureServerCredentials());
-	builder.RegisterService(&service);
-	std::unique_ptr<grpc::Server> server(builder.BuildAndStart());
+			Status(int _code, const std::string& _message)
+				: code(_code),
+				  message(_message)
+			{
+			}
 
-	server->Wait();
+			Status(const Status& _status)
+				: code(_status.code),
+				  message(_status.message)
+			{
+			}
+
+			Status& operator = (const Status& _status)
+			{
+				if (this == &_status)
+					return *this;
+				else
+				{
+					code = _status.code;
+					message = _status.message;
+					return *this;
+				}
+			}
+
+		public:
+
+			inline bool ok() const 
+			{
+				return (code == 0);
+			}
+
+			inline int getCode() const
+			{
+				return code;
+			}
+
+			inline std::string getMessage() const
+			{
+				return message;
+			}
+			
+		private:
+			int code;
+			std::string message;
+	};
 }
 
-int main(int argc, char* argv[])
-{
-	runServer();
-	
-	return 0;
-}
-
+#endif  // __DLDB_SRC_CLIENT_STATUS_H__

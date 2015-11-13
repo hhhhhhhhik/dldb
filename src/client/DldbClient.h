@@ -39,6 +39,7 @@
 
 #include <grpc++/grpc++.h>
 
+#include "Status.h"
 #include "dldb.grpc.pb.h"
 
 namespace dldb
@@ -47,7 +48,14 @@ namespace dldb
 	{
 		public:
 			DldbClient(std::shared_ptr<grpc::Channel> _proxy)
-				: proxy(_proxy)
+				: proxy(dldb::rpc::NewStub(_proxy))
+			{
+			}
+
+			DldbClient(const std::string& address)
+				: proxy(dldb::rpc::NewStub
+						(grpc::CreateChannel
+						 (address, grpc::InsecureCredentials())))
 			{
 			}
 
@@ -55,7 +63,34 @@ namespace dldb
 			{
 			}
 
-			std::string getByKey(const std::string& key)
+			Status insert(const std::string& key, const std::string& value)
+			{
+				InsertRequest request;
+				request.set_key(key);
+				request.set_values(value);
+
+				InsertReply reply;
+				grpc::ClientContext context;
+
+				grpc::Status status = proxy->Insert(&context, request, &reply);
+
+				return Status(status.error_code(), status.error_message());
+			}
+
+			Status deleteByKey(const std::string& key)
+			{
+				DeleteRequest request;
+				request.set_key(key);
+
+				DeleteReply reply;
+				grpc::ClientContext context;
+
+				grpc::Status status = proxy->Delete(&context, request, &reply);
+
+				return Status(status.error_code(), status.error_message());
+			}
+
+			Status getByKey(const std::string& key, std::string* value)
 			{
 				GetRequest request;
 				request.set_key(key);
@@ -65,14 +100,15 @@ namespace dldb
 
 				grpc::Status status = proxy->Get(&context, request, &reply);
 
-				if (status.ok()) 
+				if (status.ok())
 				{
-					return reply.value();
+					if (reply.msg().code() == 0)
+						*value = reply.value();
+					
+					return Status(reply.msg().code(), reply.msg().ret_msg());
 				}
-				else
-				{
-					return status.error_message()
-				}
+
+				return Status(status.error_code(), status.error_message());
 			}
 
 		private:
@@ -81,7 +117,7 @@ namespace dldb
 			DldbClient& operator = (const DldbClient& );
 
 		private:
-			std::unique_ptr<grpc::Channel> proxy;
+			std::unique_ptr<dldb::rpc::Stub> proxy;
 	};
 }
 

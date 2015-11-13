@@ -71,8 +71,3 @@ namespace dldb
 }
 
 #endif  // __DLDB_SRC_SERVER_DLDBSERVICEIMPL_H__
-
-
-
-
-

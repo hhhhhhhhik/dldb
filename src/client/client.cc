@@ -32,29 +32,29 @@
  */
 
 #include <iostream>
-#include <memory>
 
-#include "DldbServiceImpl.h"
+#include <grpc++/grpc++.h>
 
-void runServer()
-{
-	std::string serverAdderess("0.0.0.0:30001");
-	std::string dataDir("/root/data/");
-
-	dldb::DldbServiceImpl service(dataDir);
-	grpc::ServerBuilder builder;
-
-	builder.AddListeningPort(serverAdderess, grpc::InsecureServerCredentials());
-	builder.RegisterService(&service);
-	std::unique_ptr<grpc::Server> server(builder.BuildAndStart());
-
-	server->Wait();
-}
+#include "DldbClient.h"
 
 int main(int argc, char* argv[])
 {
-	runServer();
+	dldb::DldbClient client("localhost:30001");
+
+	std::string key("foo");
+	std::string value;
+
+	dldb::Status status = client.getByKey(key, &value);
+
+	if (status.ok())
+	{
+		std::cout << "Get Value : " << value << std::endl;
+	}
+	else
+	{
+		std::cout << "error happens with code[" << status.getCode()
+			<< "]:" << status.getMessage() << std::endl;
+	}
 	
 	return 0;
 }
-

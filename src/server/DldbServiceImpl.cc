@@ -77,14 +77,14 @@ namespace dldb
  		}
  		else
  		{
- 			bool ok;
+ 			int code;
  			std::string message;
 
  			ldb->insert(request->key(), request->values(),
- 						&ok, &message);
+ 						&code, &message);
 
  			dldb::ReturnMsg msg;
- 			msg.set_ok(ok);
+ 			msg.set_code(code);
  			msg.set_ret_msg(message);
 
  			reply->mutable_msg()->CopyFrom(msg);
@@ -108,13 +108,13 @@ namespace dldb
  		}
  		else
  		{
- 			bool ok;
+ 			int code;
  			std::string message;
 
- 			ldb->del(request->key(), &ok, &message);
+ 			ldb->del(request->key(), &code, &message);
 
  			dldb::ReturnMsg msg;
- 			msg.set_ok(ok);
+ 			msg.set_code(code);
  			msg.set_ret_msg(message);
 
  			reply->mutable_msg()->CopyFrom(msg);
@@ -138,16 +138,17 @@ namespace dldb
  		}
  		else
  		{
- 			bool ok;
+ 			int code;
  			std::string message;
 
- 			std::string value = ldb->get(request->key(), &ok, &message);
+ 			std::string value = ldb->get(request->key(), &code, &message);
 
  			dldb::ReturnMsg msg;
- 			msg.set_ok(ok);
+ 			msg.set_code(code);
  			msg.set_ret_msg(message);
 
  			reply->mutable_msg()->CopyFrom(msg);
+
  			reply->set_value(value);
 
  			return grpc::Status::OK;

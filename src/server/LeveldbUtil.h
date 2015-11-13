@@ -35,6 +35,7 @@
 #define __DLDB_SRC_SERVER_LEVELDBUTIL_H__
 
 #include <assert.h>
+#include <iostream>
 
 #include <string>
 
@@ -67,29 +68,29 @@ namespace dldb
 			}
 
 			void insert(const std::string& key, const std::string& value,
-						bool* ok, std::string* message)
+						int* code, std::string* message)
 			{
 				assert(db != NULL);
 
 				leveldb::Status status;
 				status = db->Put(leveldb::WriteOptions(), key, value);
 
-				*ok = status.ok();
+				*code = getCode(status);
 				*message = status.ToString();
 			}
 
-			void del(const std::string& key, bool* ok, std::string* message)
+			void del(const std::string& key, int* code, std::string* message)
 			{
 				assert(db != NULL);
 
 				leveldb::Status status;
 				status = db->Delete(leveldb::WriteOptions(), key);
 
-				*ok = status.ok();
+				*code = getCode(status);
 				*message = status.ToString();
 			}
 
-			std::string get(const std::string& key, bool* ok, std::string* message)
+			std::string get(const std::string& key, int* code, std::string* message)
 			{
 				assert(db != NULL);
 
@@ -97,8 +98,10 @@ namespace dldb
 				std::string value;
 				status = db->Get(leveldb::ReadOptions(), key, &value);
 
-				*ok = status.ok();
+				*code = getCode(status);
 				*message = status.ToString();
+				
+				return value;
 			}
 
 		private:
@@ -107,10 +110,34 @@ namespace dldb
 			LeveldbUtil& operator = (const LeveldbUtil& );
 
 		private:
+			static int getCode(const leveldb::Status& status)
+			{
+				if (status.ok())
+					return OK;
+				else if (status.IsNotFound())
+					return NOT_FOUND;
+				else if (status.IsCorruption())
+					return CORRUPTION;
+				else if (status.IsIOError())
+					return IO_ERROR;
+				else 
+					return UNKNOWN;
+			}
+		
+		private:
+			enum code
+			{
+				OK = 0,
+				NOT_FOUND = 1,
+				CORRUPTION = 2,
+				IO_ERROR = 3,
+				UNKNOWN = 4
+			};
+
+		private:
 			std::string dataDir;
 			leveldb::DB *db;
 	};
 }
-
 
 #endif  // __DLDB_SRC_SERVER_LEVELDBUTIL_H__
