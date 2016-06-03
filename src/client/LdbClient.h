@@ -39,6 +39,7 @@
 
 #include <grpc++/grpc++.h>
 
+#include "RpcClient.h"
 #include "Status.h"
 #include "ldb.grpc.pb.h"
 
@@ -47,15 +48,25 @@ namespace ldb
 	class LdbClient
 	{
 		public:
-			LdbClient(std::shared_ptr<grpc::Channel> _proxy)
-				: proxy(ldb::rpc::NewStub(_proxy))
+			LdbClient(std::shared_ptr<grpc::Channel> _channel)
+				: client(RpcClient<ldb::rpc>::getInstance()),
+				  proxy(ldb::rpc::NewStub(_channel))
+
 			{
 			}
 
+			/*
 			LdbClient(const std::string& address)
 				: proxy(ldb::rpc::NewStub
 						(grpc::CreateChannel
-						 (address, grpc::InsecureCredentials())))
+						 (address, grpc::InsecureChannelCredentials())))
+			{
+			}
+			*/
+			LdbClient(const std::string& address)
+				: client(RpcClient<ldb::rpc>::getInstance()),
+				  proxy(client.getStub(address))
+				  
 			{
 			}
 
@@ -70,9 +81,11 @@ namespace ldb
 				request.set_values(value);
 
 				InsertReply reply;
-				grpc::ClientContext context;
 
-				grpc::Status status = proxy->Insert(&context, request, &reply);
+				// grpc::Status status = proxy->Insert(&context, request, &reply);
+
+				grpc::Status status = client.requestSync(proxy, &ldb::rpc::Stub::Insert,
+						request, &reply);
 
 				return Status(status.error_code(), status.error_message());
 			}
@@ -85,7 +98,9 @@ namespace ldb
 				DeleteReply reply;
 				grpc::ClientContext context;
 
-				grpc::Status status = proxy->Delete(&context, request, &reply);
+				// grpc::Status status = proxy->Delete(&context, request, &reply);
+				grpc::Status status = client.requestSync(proxy, &ldb::rpc::Stub::Delete,
+						request, &reply);
 
 				return Status(status.error_code(), status.error_message());
 			}
@@ -97,8 +112,12 @@ namespace ldb
 
 				GetReply reply;
 				grpc::ClientContext context;
+				// context.set_timeout(1);
 
-				grpc::Status status = proxy->Get(&context, request, &reply);
+				// grpc::Status status = proxy->Get(&context, request, &reply);
+
+				grpc::Status status = client.requestSync(proxy, &ldb::rpc::Stub::Get,
+						request, &reply);
 
 				if (status.ok())
 				{
@@ -111,13 +130,39 @@ namespace ldb
 				return Status(status.error_code(), status.error_message());
 			}
 
+			void getByKeyAsync(const std::string& key)
+			{
+				GetRequest request;
+				request.set_key(key);
+
+				GetReply reply;
+				grpc::ClientContext context;
+				// context.set_timeout(1);
+
+				// grpc::Status status = proxy->Get(&context, request, &reply);
+
+				client.requestAsync(proxy, &ldb::rpc::Stub::AsyncGet,
+						request, &reply, getCallback);
+			}
+
+		private:
+			static void getCallback(GetReply* reply)
+			{
+				if (reply->msg().code() == 0)
+					std::cout << "Get Async:" << reply->value() << std::endl;
+				else 
+					std::cout << reply->msg().code() << ":" << reply->msg().ret_msg() << std::endl;
+			}
+
 		private:
 			// FOR NON COPYABLE
 			LdbClient(const LdbClient& );
 			LdbClient& operator = (const LdbClient& );
 
 		private:
-			std::unique_ptr<ldb::rpc::Stub> proxy;
+			RpcClient<ldb::rpc>& client;
+			std::shared_ptr<ldb::rpc::Stub> proxy;
+
 	};
 }
 

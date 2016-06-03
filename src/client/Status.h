@@ -76,7 +76,6 @@ namespace ldb
 			}
 
 		public:
-
 			inline bool ok() const 
 			{
 				return (code == 0);

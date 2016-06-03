@@ -31,6 +31,7 @@
  *
  */
 
+#include <unistd.h>
 #include <iostream>
 
 #include <grpc++/grpc++.h>
@@ -55,6 +56,10 @@ int main(int argc, char* argv[])
 		std::cout << "error happens with code[" << status.getCode()
 			<< "]:" << status.getMessage() << std::endl;
 	}
+
+	client.getByKeyAsync(key);
+
+	sleep(5);
 	
 	return 0;
 }
