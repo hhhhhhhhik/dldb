@@ -49,7 +49,7 @@
 #include "common/CountDownLatch.h"
 
 #define DEFAULT_MAX_POOL_SIZE 20
-#define DEFAULT_MAX_WORKER_SIZE 10
+#define DEFAULT_MAX_WORKER_NUM 10
 
 namespace dldb
 {
@@ -127,7 +127,7 @@ namespace dldb
 				{
 					std::shared_ptr<grpc::Channel> channel = 
 						grpc::CreateChannel(address, grpc::InsecureChannelCredentials());
-					std::shared_ptr<typename RpcType::Stub> stub = dldb::rpc::NewStub(channel);
+					std::shared_ptr<typename RpcType::Stub> stub = rpc::NewStub(channel);
 					stub_map[address] = stub;
 					return stub;
 				}
@@ -206,8 +206,8 @@ namespace dldb
 							
 		private:
 			RpcClient()
-				: max_pool_size(20),
-				  max_worker_num(10)
+				: max_pool_size(DEFAULT_MAX_POOL_SIZE),
+				  max_worker_num(DEFAULT_MAX_WORKER_NUM)
 			{
 				start();
 			}

@@ -36,16 +36,16 @@
 
 #include <grpc++/grpc++.h>
 
-#include "LdbClient.h"
+#include "DldbClient.h"
 
 int main(int argc, char* argv[])
 {
-	ldb::LdbClient client("localhost:30001");
+	dldb::DldbClient client("localhost:30001");
 
 	std::string key("foo");
 	std::string value;
 
-	ldb::Status status = client.getByKey(key, &value);
+	dldb::Status status = client.getByKey(key, &value);
 
 	if (status.ok())
 	{
@@ -57,9 +57,7 @@ int main(int argc, char* argv[])
 			<< "]:" << status.getMessage() << std::endl;
 	}
 
-	client.getByKeyAsync(key);
-
-	sleep(5);
+	client.getByKeyAsync(key, dldb::DldbClient::getCallback);
 	
 	return 0;
 }

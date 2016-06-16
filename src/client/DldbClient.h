@@ -31,11 +31,12 @@
  *
  */
 
-#ifndef __DLDB_SRC_CLIENT_LDBCLIENT_H__
-#define __DLDB_SRC_CLIENT_LDBCLIENT_H__
+#ifndef __DLDB_SRC_CLIENT_DLDBCLIENT_H__
+#define __DLDB_SRC_CLIENT_DLDBCLIENT_H__
 
 #include <string>
 #include <memory>
+#include <unistd.h>
 
 #include <grpc++/grpc++.h>
 
@@ -45,32 +46,25 @@
 
 namespace dldb
 {
-	class LdbClient
+	class DldbClient
 	{
+		typedef std::function<void(GetReply*,bool)> GetCallbackFunc;
 		public:
-			LdbClient(std::shared_ptr<grpc::Channel> _channel)
+			DldbClient(std::shared_ptr<grpc::Channel> _channel)
 				: client(RpcClient<dldb::rpc>::getInstance()),
 				  proxy(dldb::rpc::NewStub(_channel))
 
 			{
 			}
 
-			/*
-			LdbClient(const std::string& address)
-				: proxy(ldb::rpc::NewStub
-						(grpc::CreateChannel
-						 (address, grpc::InsecureChannelCredentials())))
-			{
-			}
-			*/
-			LdbClient(const std::string& address)
+			DldbClient(const std::string& address)
 				: client(RpcClient<dldb::rpc>::getInstance()),
 				  proxy(client.getStub(address))
 				  
 			{
 			}
 
-			~LdbClient()
+			~DldbClient()
 			{
 			}
 
@@ -130,34 +124,32 @@ namespace dldb
 				return Status(status.error_code(), status.error_message());
 			}
 
-			void getByKeyAsync(const std::string& key)
+			void getByKeyAsync(const std::string& key, GetCallbackFunc func)
 			{
 				GetRequest request;
 				request.set_key(key);
 
 				GetReply reply;
 				grpc::ClientContext context;
-				// context.set_timeout(1);
-
-				// grpc::Status status = proxy->Get(&context, request, &reply);
 
 				client.requestAsync(proxy, &dldb::rpc::Stub::AsyncGet,
-						request, &reply, getCallback);
+						request, &reply, func);
 			}
 
-		private:
+		public:
 			static void getCallback(GetReply* reply, bool ok)
 			{
+				sleep(5);
 				if (ok)
-					std::cout << "Get Async:" << reply->value() << std::endl;
+					std::cout << "Get Async : " << reply->value() << std::endl;
 				else 
 					std::cout << reply->msg().code() << ":" << reply->msg().ret_msg() << std::endl;
 			}
-
+			
 		private:
 			// FOR NON COPYABLE
-			LdbClient(const LdbClient& );
-			LdbClient& operator = (const LdbClient& );
+			DldbClient(const DldbClient& );
+			DldbClient& operator = (const DldbClient& );
 
 		private:
 			RpcClient<dldb::rpc>& client;

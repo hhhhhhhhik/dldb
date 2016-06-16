@@ -36,7 +36,7 @@
 
 #include <string>
 
-namespace ldb
+namespace dldb
 {
 	class Status
 	{
@@ -95,6 +95,6 @@ namespace ldb
 			int code;
 			std::string message;
 	};
-}
+}  // namepsace dldb
 
 #endif  // __DLDB_SRC_CLIENT_STATUS_H__

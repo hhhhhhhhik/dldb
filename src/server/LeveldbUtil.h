@@ -41,7 +41,7 @@
 
 #include "leveldb/db.h"
 
-namespace ldb
+namespace dldb
 {
 	class LeveldbUtil
 	{
@@ -138,6 +138,6 @@ namespace ldb
 			std::string dataDir;
 			leveldb::DB *db;
 	};
-}
+}  // namespace dldb
 
 #endif  // __DLDB_SRC_SERVER_LEVELDBUTIL_H__

@@ -1,7 +1,7 @@
 ###############################
 #      user program           #
 ###############################
-TARGETS = ldb_server
+TARGETS = dldb_server
 
 PROTOS_PATH = ../protos
 LEVELDB_PATH = /root/work/leveldb
@@ -27,7 +27,7 @@ vpath %.proto $(PROTOS_PATH)
 
 all:$(TARGETS)
 
-$(TARGETS): ldb.pb.o ldb.grpc.pb.o LdbServiceImpl.o server.o
+$(TARGETS): dldb.pb.o dldb.grpc.pb.o DldbServiceImpl.o server.o
 	$(CXX) $^ $(LDFLAGS) -o $@
 
 %.grpc.pb.cc: %.proto

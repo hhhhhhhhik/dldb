@@ -31,30 +31,45 @@
  *
  */
 
-#include <iostream>
-#include <memory>
+#ifndef __DLDB_SRC_SERVER_DLDBSERVICEIMPL_H__
+#define __DLDB_SRC_SERVER_DLDBSERVICEIMPL_H__
 
-#include "DldbServiceImpl.h"
+#include <grpc++/grpc++.h>
 
-void runServer()
+#include "LeveldbUtil.h"
+
+#include "dldb.grpc.pb.h"
+
+namespace dldb
 {
-	std::string serverAdderess("0.0.0.0:30001");
-	std::string dataDir("/root/data/");
+	class DldbServiceImpl : public dldb::rpc::Service 
+	{
+		public:
+			DldbServiceImpl(const std::string& _dataDir);
+			
+			virtual ~DldbServiceImpl();
 
-	dldb::DldbServiceImpl service(dataDir);
-	grpc::ServerBuilder builder;
+			grpc::Status Insert(grpc::ServerContext* context, 
+				const InsertRequest* request, InsertReply* reply) override;
 
-	builder.AddListeningPort(serverAdderess, grpc::InsecureServerCredentials());
-	builder.RegisterService(&service);
-	std::unique_ptr<grpc::Server> server(builder.BuildAndStart());
+			grpc::Status Delete(grpc::ServerContext* context,
+				const DeleteRequest* request, DeleteReply* reply) override;
 
-	server->Wait();
-}
+			grpc::Status Get(grpc::ServerContext* context, 
+				const GetRequest* request, GetReply* reply) override;
+		
+		private:
+			// FOR NONCOPYABLE
+			DldbServiceImpl(const DldbServiceImpl& );
+			DldbServiceImpl& operator = (const DldbServiceImpl& );
 
-int main(int argc, char* argv[])
-{
-	runServer();
-	
-	return 0;
-}
+			void init();
+		
+		private:
+			std::string dataDir;
+			LeveldbUtil* ldb;
+			bool initFlag;
+	};
+}  // namespace dldb
 
+#endif  // __DLDB_SRC_SERVER_DLDBSERVICEIMPL_H__
